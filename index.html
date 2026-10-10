@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080b09">
+
+  <title>TuneMux — Your Music, Your Way</title>
+
+  <meta name="description" content="TuneMux is an Android music and video player designed for a smooth, flexible listening and viewing experience.">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TuneMux — Your Music, Your Way">
+  <meta property="og:description" content="A flexible music and video player for Android. Discover a better way to enjoy your media.">
+  <meta property="og:site_name" content="TuneMux">
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b09;
+      --surface: #101511;
+      --surface-light: #151d17;
+      --green: #a3ff68;
+      --green-dark: #6fca3b;
+      --text: #f4f7f2;
+      --muted: #a1aaa1;
+      --border: rgba(163, 255, 104, 0.14);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px;
+    }
+
+    body {
+      background:
+        radial-gradient(ellipse at 50% -20%, rgba(82, 151, 54, 0.15), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .container {
+      width: min(1120px, calc(100% - 40px));
+      margin-inline: auto;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(8, 11, 9, 0.84);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-inner {
+      min-height: 76px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 1.35rem;
+      font-weight: 850;
+      letter-spacing: -0.7px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: #091007;
+      background: var(--green);
+      box-shadow: 0 0 26px rgba(163, 255, 104, 0.16);
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .brand span:last-child em {
+      color: var(--green);
+      font-style: normal;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .nav-links a:hover,
+    .footer-links a:hover {
+      color: var(--green);
+    }
+
+    .nav-cta {
+      padding: 9px 16px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--green) !important;
+    }
+
+    .hero {
+      padding: 104px 0 92px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 7px 13px;
+      margin-bottom: 27px;
+      color: var(--green);
+      background: rgba(163, 255, 104, 0.045);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+    }
+
+    h1 {
+      max-width: 850px;
+      margin: 0 auto;
+      font-size: clamp(2.7rem, 7vw, 5.7rem);
+      line-height: 1.04;
+      letter-spacing: -4px;
+      font-weight: 850;
+    }
+
+    .gradient-text {
+      color: var(--green);
+      background: linear-gradient(100deg, #c7ff9d, #75e743);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-description {
+      max-width: 620px;
+      margin: 25px auto 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.12rem);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 13px;
+      margin-top: 34px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 49px;
+      padding: 12px 22px;
+      border-radius: 12px;
+      font-size: 0.94rem;
+      font-weight: 750;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+    }
+
+    .button-primary {
+      color: #0b1208;
+      background: var(--green);
+      box-shadow: 0 8px 30px rgba(163, 255, 104, 0.12);
+    }
+
+    .button-primary:hover {
+      background: #b9ff91;
+    }
+
+    .button-secondary {
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .button-secondary:hover {
+      border-color: var(--border);
+      background: var(--surface);
+    }
+
+    .hero-note {
+      margin-top: 16px;
+      color: #788178;
+      font-size: 0.8rem;
+    }
+
+    .visual-wrap {
+      max-width: 780px;
+      margin: 60px auto 0;
+      padding: 1px;
+      border-radius: 28px;
+      background: linear-gradient(
+        135deg,
+        rgba(163, 255, 104, 0.35),
+        rgba(255, 255, 255, 0.04) 50%,
+        rgba(163, 255, 104, 0.12)
+      );
+      box-shadow: 0 30px 100px rgba(0, 0, 0, 0.35);
+    }
+
+    .player-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      align-items: center;
+      padding: 35px;
+      border-radius: 27px;
+      background:
+        radial-gradient(circle at 18% 40%, rgba(93, 160, 63, 0.13), transparent 42%),
+        #0c100d;
+      text-align: left;
+    }
+
+    .album-art {
+      position: relative;
+      display: grid;
+      place-items: center;
+      aspect-ratio: 1;
+      max-width: 310px;
+      width: 100%;
+      margin: auto;
+      border-radius: 24px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(163, 255, 104, 0.22), transparent 28%),
+        linear-gradient(145deg, #263d27, #111b13 55%, #080b09);
+      border: 1px solid rgba(163, 255, 104, 0.12);
+    }
+
+    .album-art::before,
+    .album-art::after {
+      content: "";
+      position: absolute;
+      border: 1px solid rgba(163, 255, 104, 0.28);
+      border-radius: 50%;
+      width: 72%;
+      aspect-ratio: 1;
+    }
+
+    .album-art::after {
+      width: 48%;
+      border-color: rgba(163, 255, 104, 0.48);
+    }
+
+    .music-symbol {
+      z-index: 1;
+      color: var(--green);
+      font-size: 4.6rem;
+      text-shadow: 0 0 35px rgba(163, 255, 104, 0.35);
+    }
+
+    .preview-label {
+      color: var(--green);
+      font-size: 0.74rem;
+      font-weight: 750;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .preview-info h2 {
+      margin-top: 9px;
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      line-height: 1.2;
+      letter-spacing: -1px;
+    }
+
+    .preview-info p {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 0.91rem;
+    }
+
+    .waveform {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin: 25px 0 12px;
+    }
+
+    .waveform span {
+      flex: 1;
+      max-width: 7px;
+      border-radius: 99px;
+      background: var(--green);
+      opacity: 0.8;
+    }
+
+    .waveform span:nth-child(5n + 1) { height: 22%; }
+    .waveform span:nth-child(5n + 2) { height: 58%; }
+    .waveform span:nth-child(5n + 3) { height: 88%; }
+    .waveform span:nth-child(5n + 4) { height: 42%; }
+    .waveform span:nth-child(5n) { height: 70%; }
+
+    .preview-caption {
+      color: #899389;
+      font-size: 0.78rem;
+    }
+
+    section {
+      padding: 76px 0;
+    }
+
+    .section-heading {
+      max-width: 650px;
+      margin: 0 auto 42px;
+      text-align: center;
+    }
+
+    .section-kicker {
+      color: var(--green);
+      font-size: 0.78rem;
+      font-weight: 750;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .section-heading h2 {
+      margin-top: 10px;
+      font-size: clamp(2rem, 4vw, 3.1rem);
+      line-height: 1.15;
+      letter-spacing: -1.7px;
+    }
+
+    .section-heading p {
+      margin-top: 15px;
+      color: var(--muted);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      min-height: 210px;
+      padding: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border);
+    }
+
+    .feature-icon {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--green);
+      background: rgba(163, 255, 104, 0.07);
+      font-size: 1.35rem;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 8px;
+      font-size: 1.08rem;
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      font-size: 0.91rem;
+    }
+
+    .download-section {
+      padding: 40px 0 100px;
+    }
+
+    .download-panel {
+      position: relative;
+      overflow: hidden;
+      padding: 58px 28px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background:
+        radial-gradient(ellipse at 50% 120%, rgba(163, 255, 104, 0.12), transparent 60%),
+        #0e130f;
+      text-align: center;
+    }
+
+    .download-panel h2 {
+      margin-top: 12px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.15;
+      letter-spacing: -1.5px;
+    }
+
+    .download-panel p {
+      max-width: 540px;
+      margin: 17px auto 25px;
+      color: var(--muted);
+    }
+
+    .coming-soon {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 20px;
+      border: 1px solid rgba(163, 255, 104, 0.22);
+      border-radius: 12px;
+      color: var(--green);
+      background: rgba(163, 255, 104, 0.06);
+      font-weight: 750;
+      cursor: default;
+    }
+
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 28px 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .footer-copy {
+      color: #7f897f;
+      font-size: 0.83rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 22px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    @media (max-width: 760px) {
+      .nav-inner {
+        min-height: 68px;
+      }
+
+      .nav-links {
+        gap: 16px;
+        font-size: 0.85rem;
+      }
+
+      .nav-links .nav-optional {
+        display: none;
+      }
+
+      .hero {
+        padding: 78px 0 60px;
+      }
+
+      h1 {
+        letter-spacing: -2.5px;
+      }
+
+      .visual-wrap {
+        margin-top: 42px;
+      }
+
+      .player-preview {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        padding: 24px;
+      }
+
+      .album-art {
+        max-width: 245px;
+      }
+
+      .preview-info {
+        text-align: center;
+      }
+
+      .waveform {
+        justify-content: center;
+      }
+
+      .waveform span {
+        flex: 0 1 7px;
+      }
+
+      section {
+        padding: 60px 0;
+      }
+
+      .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .feature-card {
+        padding: 21px;
+      }
+
+      .download-section {
+        padding-bottom: 70px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        width: min(100% - 30px, 1120px);
+      }
+
+      .brand {
+        font-size: 1.18rem;
+      }
+
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+      }
+
+      .nav-links {
+        gap: 12px;
+      }
+
+      .nav-cta {
+        padding: 7px 10px;
+      }
+
+      .hero {
+        padding-top: 65px;
+      }
+
+      .eyebrow {
+        font-size: 0.68rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+        padding-inline: 10px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-card {
+        min-height: auto;
+      }
+
+      .download-panel {
+        padding: 43px 20px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .footer-links {
+        gap: 17px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a class="brand" href="#home" aria-label="TuneMux home">
+        <span class="brand-mark" aria-hidden="true">♪</span>
+        <span>Tune<em>Mux</em></span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-optional" href="#features">Features</a>
+        <a class="nav-optional" href="#about">About</a>
+        <a class="nav-cta" href="#download">Get the app</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="container">
+        <div class="eyebrow">
+          <span class="status-dot" aria-hidden="true"></span>
+          Your entertainment, your way
+        </div>
+
+        <h1>
+          Your music.<br>
+          <span class="gradient-text">Your own rhythm.</span>
+        </h1>
+
+        <p class="hero-description">
+          Meet TuneMux, an Android music and video player built to make
+          your listening and viewing experience feel more personal.
+        </p>
+
+        <div class="hero-actions">
+          <a class="button button-primary" href="#download">
+            <span aria-hidden="true">↓</span>
+            Get TuneMux
+          </a>
+
+          <a class="button button-secondary" href="#features">
+            Explore features <span aria-hidden="true">↘</span>
+          </a>
+        </div>
+
+        <p class="hero-note">
+          Android app · Download availability coming soon
+        </p>
+
+        <div class="visual-wrap" aria-label="TuneMux music player concept">
+          <div class="player-preview">
+            <div class="album-art" aria-hidden="true">
+              <span class="music-symbol">♫</span>
+            </div>
+
+            <div class="preview-info">
+              <span class="preview-label">Made for your moments</span>
+              <h2>Press play.<br>Find your flow.</h2>
+              <p>
+                Music and video playback in an experience designed around you.
+              </p>
+
+              <div class="waveform" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+              </div>
+
+              <div class="preview-caption">
+                Your media. Your playlists. Your time.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="container">
+        <div class="section-heading">
+          <span class="section-kicker">Made for everyday listening</span>
+          <h2>More ways to enjoy your media.</h2>
+          <p>
+            Keep your favorite content close and make your listening
+            experience work the way you want.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">♫</div>
+            <h3>Music & Video</h3>
+            <p>
+              Enjoy supported music and video content from one convenient player.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">▤</div>
+            <h3>Your Playlists</h3>
+            <p>
+              Organize tracks into playlists and keep your listening choices together.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">♡</div>
+            <h3>Favorites</h3>
+            <p>
+              Save the tracks you like so they are easier to find again.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">◷</div>
+            <h3>Listening History</h3>
+            <p>
+              Return to previously played content without starting your search over.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">◖</div>
+            <h3>Background Playback</h3>
+            <p>
+              Keep listening while using other apps, where supported.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">☾</div>
+            <h3>Sleep Timer</h3>
+            <p>
+              Set a listening time limit and wind down at your own pace.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="container">
+        <div class="section-heading">
+          <span class="section-kicker">The TuneMux idea</span>
+          <h2>Less friction.<br>More time for what you love.</h2>
+          <p>
+            TuneMux brings useful playback tools and personal media
+            organization together in one Android app. We want your everyday
+            listening experience to feel simple, flexible, and yours.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="download-section" id="download">
+      <div class="container">
+        <div class="download-panel">
+          <span class="section-kicker">Coming soon</span>
+          <h2>Your next listening experience<br>is on its way.</h2>
+          <p>
+            TuneMux download availability will be announced here.
+            Check back for updates.
+          </p>
+
+          <span class="coming-soon">
+            <span class="status-dot" aria-hidden="true"></span>
+            Download coming soon
+          </span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        <a class="brand" href="#home">
+          <span class="brand-mark" aria-hidden="true">♪</span>
+          <span>Tune<em>Mux</em></span>
+        </a>
+        <p class="footer-copy" style="margin-top: 10px;">
+          © <span id="year">2026</span> TuneMux. All rights reserved.
+        </p>
+      </div>
+
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="#features">Features</a>
+        <a href="#download">Download</a>
+        <a href="./privacy.html">Privacy Policy</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
